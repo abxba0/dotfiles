@@ -81,10 +81,7 @@ return {
       },
     },
     config = function(_, opts)
-      local ok, configs = pcall(require, "nvim-treesitter.configs")
-      if ok then
-        configs.setup(opts)
-      end
+      require("nvim-treesitter.configs").setup(opts)
     end,
   },
 
@@ -94,26 +91,25 @@ return {
     dependencies = { "nvim-treesitter/nvim-treesitter" },
     event = "VeryLazy",
     config = function()
-      -- Wrap in pcall to handle case where treesitter isn't loaded yet
-      local ok, move = pcall(require, "nvim-treesitter.textobjects.move")
-      if not ok then return end
-      local ok2, configs = pcall(require, "nvim-treesitter.configs")
-      if not ok2 then return end
-      for name, fn in pairs(move) do
-        if name:find("goto") == 1 then
-          move[name] = function(q, ...)
-            if vim.wo.diff then
-              local config = configs.get_module("textobjects.move")[name]
-              for key, query in pairs(config or {}) do
-                if q == query and key:find("[%]%[]c") then
-                  vim.cmd("normal! " .. key)
-                  return
-                end
-              end
-            end
-            return fn(q, ...)
-          end
+      -- Diff mode: use native ]c [c navigation
+      local move = require("nvim-treesitter.textobjects.move")
+      local orig_goto_next_start = move.goto_next_start
+      local orig_goto_previous_start = move.goto_previous_start
+
+      move.goto_next_start = function(query, ...)
+        if vim.wo.diff and query == "@class.outer" then
+          vim.cmd("normal! ]c")
+          return
         end
+        return orig_goto_next_start(query, ...)
+      end
+
+      move.goto_previous_start = function(query, ...)
+        if vim.wo.diff and query == "@class.outer" then
+          vim.cmd("normal! [c")
+          return
+        end
+        return orig_goto_previous_start(query, ...)
       end
     end,
   },
