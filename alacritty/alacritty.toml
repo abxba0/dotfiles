@@ -1,0 +1,91 @@
+# Alacritty Configuration
+# Terminal emulator with tmux and zsh integration
+
+# Shell Configuration - Launch tmux by default
+# tmux will use zsh as configured in ~/.tmux.conf
+[shell]
+program = "/usr/bin/tmux"
+args = ["new-session", "-A", "-s", "main"]
+
+# Environment variables
+[env]
+TERM = "xterm-256color"
+
+# Window settings
+[window]
+padding = { x = 10, y = 10 }
+decorations = "full"
+opacity = 0.95
+title = "Alacritty"
+dynamic_title = true
+startup_mode = "Windowed"
+
+# Font configuration
+[font]
+size = 12.0
+
+[font.normal]
+family = "monospace"
+style = "Regular"
+
+[font.bold]
+family = "monospace"
+style = "Bold"
+
+[font.italic]
+family = "monospace"
+style = "Italic"
+
+[font.bold_italic]
+family = "monospace"
+style = "Bold Italic"
+
+# Cursor settings
+[cursor]
+style = { shape = "Block", blinking = "On" }
+blink_interval = 750
+unfocused_hollow = true
+
+# Scrolling
+[scrolling]
+history = 10000
+multiplier = 3
+
+# Selection
+[selection]
+save_to_clipboard = true
+
+# Mouse settings
+[mouse]
+hide_when_typing = true
+
+# Keyboard bindings (optional customizations)
+[[keyboard.bindings]]
+key = "V"
+mods = "Control|Shift"
+action = "Paste"
+
+[[keyboard.bindings]]
+key = "C"
+mods = "Control|Shift"
+action = "Copy"
+
+[[keyboard.bindings]]
+key = "N"
+mods = "Control|Shift"
+action = "SpawnNewInstance"
+
+[[keyboard.bindings]]
+key = "Plus"
+mods = "Control"
+action = "IncreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Minus"
+mods = "Control"
+action = "DecreaseFontSize"
+
+[[keyboard.bindings]]
+key = "Key0"
+mods = "Control"
+action = "ResetFontSize"
