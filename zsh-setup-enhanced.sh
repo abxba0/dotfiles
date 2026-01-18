@@ -383,12 +383,16 @@ main() {
     print_info "=========================================="
     echo ""
     print_info "Next steps:"
-    print_info "  1. Start a new shell session: exec zsh"
+    local step_num=1
+    print_info "  $step_num. Start a new shell session: exec zsh"
+    step_num=$((step_num + 1))
     if [ "$use_p10k" = "yes" ]; then
-        print_info "  2. Configure Powerlevel10k: p10k configure"
+        print_info "  $step_num. Configure Powerlevel10k: p10k configure"
+        step_num=$((step_num + 1))
     fi
-    print_info "  $([ "$use_p10k" = "yes" ] && echo "3" || echo "2"). Customize ~/.zshrc as needed"
-    print_info "  $([ "$use_p10k" = "yes" ] && echo "4" || echo "3"). Update plugins anytime: bash zsh-update.sh"
+    print_info "  $step_num. Customize ~/.zshrc as needed"
+    step_num=$((step_num + 1))
+    print_info "  $step_num. Update plugins anytime: bash zsh-update.sh"
     echo ""
     print_info "Enjoy your enhanced Zsh experience! 🚀"
     echo ""

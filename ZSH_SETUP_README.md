@@ -60,7 +60,12 @@ brew install bat exa ripgrep fd neovim
 
 ### Ubuntu/Debian
 ```bash
+# Note: 'bat' is installed as 'batcat' on Ubuntu/Debian
 sudo apt install bat exa ripgrep fd-find neovim
+# Create symlinks for easier usage
+mkdir -p ~/.local/bin
+ln -s /usr/bin/batcat ~/.local/bin/bat
+ln -s /usr/bin/fdfind ~/.local/bin/fd
 ```
 
 ### Aliases for these tools
