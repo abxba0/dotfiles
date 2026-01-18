@@ -1,65 +1,118 @@
-# Zsh Setup Script
+# Zsh Enhanced Setup Script
 
-A simple script to set up Zsh with useful plugins and configuration.
-
-## Requirements
-
-- Zsh installed
-- Oh-My-Zsh installed
-- Git
+Comprehensive Zsh setup with Oh-My-Zsh, plugins, themes, and productivity features.
 
 ## Usage
 
 ```bash
-bash zsh-enhanced-setup.sh
+./zsh-enhanced-setup.sh [command]
 ```
 
-## What It Does
+### Commands
 
-1. **Installs Plugins** to `~/.oh-my-zsh/custom/plugins/`:
-   - zsh-autosuggestions
-   - zsh-syntax-highlighting
-   - zsh-completions
-   - zsh-history-substring-search
-   - fzf
-   - autojump
+| Command | Description |
+|---------|-------------|
+| `install` | Full interactive installation (default) |
+| `update` | Update Oh-My-Zsh, plugins, and themes |
+| `quick` | Quick minimal installation (no prompts) |
+| `help` | Show help message |
 
-2. **Creates `.zshrc`** with:
-   - All plugins enabled
-   - History configuration (10000 entries)
-   - Key bindings for history substring search (up/down arrows)
-   - Basic aliases:
-     - `ll` → `ls -lah`
-     - `gs` → `git status`
-     - `ga` → `git add`
-     - `gc` → `git commit`
-     - `gp` → `git push`
+### Examples
 
-3. **Backups** existing `.zshrc` to `.zshrc.backup`
+```bash
+./zsh-enhanced-setup.sh           # Interactive full installation
+./zsh-enhanced-setup.sh install   # Same as above
+./zsh-enhanced-setup.sh update    # Update all components
+./zsh-enhanced-setup.sh quick     # Quick setup with defaults
+```
+
+## Features
+
+### Installation
+- Dependency checking (git, curl, zsh)
+- Automatic Oh-My-Zsh installation
+- Interactive prompts for optional components
+- Timestamped backups of existing `.zshrc`
+
+### Plugins Installed
+- zsh-autosuggestions
+- zsh-syntax-highlighting / fast-syntax-highlighting
+- zsh-completions
+- zsh-history-substring-search
+- autojump
+- FZF (optional)
+
+### Optional Themes
+- Powerlevel10k (interactive prompt)
+
+### .zshrc Configuration
+
+**History** (50,000 entries):
+- Shared between sessions
+- Duplicate removal
+- Ignore commands starting with space
+
+**Aliases included**:
+- Git shortcuts: `gs`, `ga`, `gaa`, `gc`, `gcm`, `gp`, `gpl`, `gd`, `gds`, `gco`, `gcb`, `gb`, `gba`, `glog`, `gloga`, `gst`, `gstp`
+- Directory navigation: `..`, `...`, `....`, `.....`, `~`, `-`
+- Config editing: `zshrc`, `reload`
+- System utilities: `h`, `path`, `ports`, `now`, `week`
+- Safety: `rm -i`, `cp -i`, `mv -i`
+- Colored grep: `grep`, `fgrep`, `egrep`
+- Better ls/cat (if eza/exa/bat installed)
+
+**Utility functions**:
+- `mkcd` - Create directory and cd into it
+- `extract` - Extract any archive format
+- `fh` - Search command history with fzf
+- `fkill` - Search and kill process
+- `ff` - Find file by name
+- `fdir` - Find directory by name
+- `backup` - Create timestamped backup of a file
+- `myip` - Get external IP
+- `serve` - Quick HTTP server
+
+**FZF configuration**:
+- Uses `fd` or `rg` if available
+- Custom color scheme
+- Preview with `bat` if available
+
+**Key bindings**:
+- `Up/Down` - History substring search
+- `Ctrl+R` - FZF history search
+- `Ctrl+T` - FZF file search
+- `Alt+C` - FZF cd
+- `Home/End` - Beginning/end of line
+- `Ctrl+Arrow` - Word navigation
+
+### Local Customizations
+
+Add custom settings to `~/.zshrc.local` - it's automatically sourced if present.
 
 ## After Installation
 
-Restart your shell:
+1. Start a new shell: `exec zsh`
+2. Configure Powerlevel10k (if installed): `p10k configure`
+3. Customize `~/.zshrc` as needed
+
+## Updating
+
+Run anytime to update all components:
 ```bash
-exec zsh
+./zsh-enhanced-setup.sh update
 ```
-
-## Idempotent
-
-Safe to re-run. Existing plugins are skipped, and `.zshrc` is backed up before overwriting.
-
-## Customization
-
-After running the setup, you can customize `~/.zshrc`:
-
-1. **Change theme**: Edit `ZSH_THEME="robbyrussell"` to your preferred theme
-2. **Add more plugins**: Add to the `plugins=(...)` array
-3. **Add custom aliases**: Append to the bottom of the file
 
 ## Troubleshooting
 
-**Issue**: Plugins not loading
-- Run `exec zsh` to restart shell
+**Plugins not loading**: Run `exec zsh` to restart shell
 
-**Issue**: Oh-My-Zsh not found
-- Install Oh-My-Zsh first: `sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"`
+**Permission denied changing shell**: Ensure zsh is in `/etc/shells`:
+```bash
+sudo sh -c 'echo $(which zsh) >> /etc/shells'
+chsh -s $(which zsh)
+```
+
+**Oh-My-Zsh installation fails**: Install manually:
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
