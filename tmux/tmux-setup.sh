@@ -176,18 +176,62 @@ install_config() {
 # Plugin Installation
 # ============================================
 
+# Parse plugins from tmux.conf and install them directly
+# This works both inside and outside of tmux
 install_plugins() {
-    print_info "Installing tmux plugins via TPM..."
+    print_info "Installing tmux plugins..."
 
-    if [ ! -f "$TPM_DIR/bin/install_plugins" ]; then
-        print_error "TPM install script not found. Please install TPM first."
+    if [ ! -f "$TMUX_CONF" ]; then
+        print_error "tmux.conf not found. Please install config first."
         exit 1
     fi
 
-    # Install plugins using TPM
-    "$TPM_DIR/bin/install_plugins"
+    # Extract plugin names from config (format: set -g @plugin 'user/repo')
+    local plugins
+    plugins=$(grep -E "^set -g @plugin" "$TMUX_CONF" | sed -E "s/.*'([^']+)'.*/\1/" | grep -v "tpm$")
+
+    if [ -z "$plugins" ]; then
+        print_warn "No plugins found in tmux.conf"
+        return 0
+    fi
+
+    local plugin
+    for plugin in $plugins; do
+        install_single_plugin "$plugin"
+    done
 
     print_info "All plugins installed successfully!"
+}
+
+# Install a single plugin by cloning from GitHub
+install_single_plugin() {
+    local plugin="$1"
+    local plugin_name
+    local plugin_dir
+
+    # Handle different plugin name formats
+    # e.g., "tmux-plugins/tmux-sensible" -> "tmux-sensible"
+    # e.g., "catppuccin/tmux" -> "tmux" but we rename to "catppuccin"
+    plugin_name=$(basename "$plugin")
+
+    # Special case: catppuccin/tmux should be installed as "catppuccin"
+    if [[ "$plugin" == "catppuccin/tmux" ]]; then
+        plugin_name="catppuccin"
+    fi
+
+    plugin_dir="$PLUGINS_DIR/$plugin_name"
+
+    if [ -d "$plugin_dir/.git" ]; then
+        print_info "Updating $plugin_name..."
+        (cd "$plugin_dir" && git pull --quiet) || print_warn "Failed to update $plugin_name"
+    elif [ -d "$plugin_dir" ]; then
+        print_warn "$plugin_name directory exists but is not a git repo, skipping..."
+    else
+        print_info "Installing $plugin_name..."
+        git clone --depth=1 "https://github.com/$plugin" "$plugin_dir" 2>/dev/null \
+            && print_info "  $plugin_name installed!" \
+            || print_warn "  Failed to install $plugin_name"
+    fi
 }
 
 # ============================================
@@ -205,14 +249,22 @@ update_all() {
         print_warn "TPM not found"
     fi
 
-    # Update all plugins
-    if [ -f "$TPM_DIR/bin/update_plugins" ]; then
-        print_info "Updating all plugins..."
-        "$TPM_DIR/bin/update_plugins" all
-        print_info "All plugins updated!"
-    else
-        print_warn "TPM update script not found"
-    fi
+    # Update all plugins by iterating through installed plugin directories
+    print_info "Updating all plugins..."
+    local plugin_dir
+    for plugin_dir in "$PLUGINS_DIR"/*/; do
+        [ -d "$plugin_dir" ] || continue
+        # Skip TPM itself (already updated above)
+        [[ "$plugin_dir" == *"/tpm/" ]] && continue
+
+        local name
+        name=$(basename "$plugin_dir")
+        if [ -d "$plugin_dir/.git" ]; then
+            print_info "Updating $name..."
+            (cd "$plugin_dir" && git pull --quiet) || print_warn "Failed to update $name"
+        fi
+    done
+    print_info "All plugins updated!"
 
     print_header "Update Complete!"
     print_info "Reload tmux config: tmux source-file ~/.tmux.conf"
