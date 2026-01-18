@@ -63,30 +63,77 @@ clone_or_update() {
 }
 
 # ============================================
+# Dependency Installation
+# ============================================
+
+install_dependencies() {
+    local deps=("$@")
+
+    if [ ${#deps[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    print_info "Installing missing dependencies: ${deps[*]}"
+
+    # Detect package manager and install
+    if command_exists apt-get; then
+        print_info "Detected apt package manager (Debian/Ubuntu)"
+        sudo apt update
+        sudo apt install -y "${deps[@]}"
+    elif command_exists dnf; then
+        print_info "Detected dnf package manager (Fedora)"
+        sudo dnf install -y "${deps[@]}"
+    elif command_exists yum; then
+        print_info "Detected yum package manager (CentOS/RHEL)"
+        sudo yum install -y "${deps[@]}"
+    elif command_exists pacman; then
+        print_info "Detected pacman package manager (Arch)"
+        sudo pacman -S --noconfirm "${deps[@]}"
+    elif command_exists brew; then
+        print_info "Detected Homebrew (macOS)"
+        brew install "${deps[@]}"
+    else
+        print_error "Could not detect package manager. Please install manually: ${deps[*]}"
+        exit 1
+    fi
+
+    # Verify installation
+    local failed_deps=()
+    for dep in "${deps[@]}"; do
+        if ! command_exists "$dep"; then
+            failed_deps+=("$dep")
+        fi
+    done
+
+    if [ ${#failed_deps[@]} -ne 0 ]; then
+        print_error "Failed to install: ${failed_deps[*]}"
+        exit 1
+    fi
+
+    print_info "Dependencies installed successfully!"
+}
+
+# ============================================
 # Dependency Checking
 # ============================================
 
 check_dependencies() {
     print_info "Checking dependencies..."
-    
+
     local missing_deps=()
-    
+
     for dep in git curl zsh; do
         if ! command_exists "$dep"; then
             missing_deps+=("$dep")
         fi
     done
-    
+
     if [ ${#missing_deps[@]} -ne 0 ]; then
-        print_error "Missing required dependencies: ${missing_deps[*]}"
-        print_info "Please install them first:"
-        print_info "  Ubuntu/Debian: sudo apt install ${missing_deps[*]}"
-        print_info "  macOS: brew install ${missing_deps[*]}"
-        print_info "  Fedora: sudo dnf install ${missing_deps[*]}"
-        print_info "  Arch: sudo pacman -S ${missing_deps[*]}"
-        exit 1
+        print_warn "Missing dependencies: ${missing_deps[*]}"
+        print_info "Attempting to install automatically..."
+        install_dependencies "${missing_deps[@]}"
     fi
-    
+
     print_info "All dependencies satisfied!"
 }
 
