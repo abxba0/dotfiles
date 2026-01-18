@@ -50,8 +50,8 @@ opt.listchars = {                           -- Define invisible characters
   precedes = "❮",
 }
 opt.fillchars = {                           -- Characters for UI elements
-  foldopen = "",
-  foldclose = "",
+  foldopen = "▾",
+  foldclose = "▸",
   fold = " ",
   foldsep = " ",
   diff = "╱",

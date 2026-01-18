@@ -1,0 +1,416 @@
+{
+  "generated": "2025-01-18T00:00:00+00:00",
+  "version": "1.0.0",
+  "description": "Plugin manifest for Neovim configuration",
+  "plugins": {
+    "plugin_manager": [
+      {
+        "name": "lazy.nvim",
+        "repo": "folke/lazy.nvim",
+        "url": "https://github.com/folke/lazy.nvim",
+        "branch": "stable",
+        "description": "Modern plugin manager for Neovim",
+        "category": "core"
+      }
+    ],
+    "core": [
+      {
+        "name": "plenary.nvim",
+        "repo": "nvim-lua/plenary.nvim",
+        "url": "https://github.com/nvim-lua/plenary.nvim",
+        "description": "Lua utility functions used by many plugins"
+      },
+      {
+        "name": "nvim-treesitter",
+        "repo": "nvim-treesitter/nvim-treesitter",
+        "url": "https://github.com/nvim-treesitter/nvim-treesitter",
+        "description": "Syntax highlighting, AST parsing, and text objects"
+      },
+      {
+        "name": "nvim-treesitter-textobjects",
+        "repo": "nvim-treesitter/nvim-treesitter-textobjects",
+        "url": "https://github.com/nvim-treesitter/nvim-treesitter-textobjects",
+        "description": "Treesitter-based text objects"
+      }
+    ],
+    "lsp": [
+      {
+        "name": "nvim-lspconfig",
+        "repo": "neovim/nvim-lspconfig",
+        "url": "https://github.com/neovim/nvim-lspconfig",
+        "description": "Official LSP configuration"
+      },
+      {
+        "name": "mason.nvim",
+        "repo": "williamboman/mason.nvim",
+        "url": "https://github.com/williamboman/mason.nvim",
+        "description": "Package manager for LSP servers, formatters, linters"
+      },
+      {
+        "name": "mason-lspconfig.nvim",
+        "repo": "williamboman/mason-lspconfig.nvim",
+        "url": "https://github.com/williamboman/mason-lspconfig.nvim",
+        "description": "Bridge between mason.nvim and lspconfig"
+      },
+      {
+        "name": "blink.cmp",
+        "repo": "saghen/blink.cmp",
+        "url": "https://github.com/saghen/blink.cmp",
+        "description": "Modern completion engine"
+      },
+      {
+        "name": "LuaSnip",
+        "repo": "L3MON4D3/LuaSnip",
+        "url": "https://github.com/L3MON4D3/LuaSnip",
+        "description": "Snippet engine"
+      },
+      {
+        "name": "friendly-snippets",
+        "repo": "rafamadriz/friendly-snippets",
+        "url": "https://github.com/rafamadriz/friendly-snippets",
+        "description": "Snippet library"
+      },
+      {
+        "name": "conform.nvim",
+        "repo": "stevearc/conform.nvim",
+        "url": "https://github.com/stevearc/conform.nvim",
+        "description": "Formatting engine"
+      },
+      {
+        "name": "nvim-lint",
+        "repo": "mfussenegger/nvim-lint",
+        "url": "https://github.com/mfussenegger/nvim-lint",
+        "description": "Linting engine"
+      },
+      {
+        "name": "trouble.nvim",
+        "repo": "folke/trouble.nvim",
+        "url": "https://github.com/folke/trouble.nvim",
+        "description": "Diagnostics viewer"
+      }
+    ],
+    "ui": [
+      {
+        "name": "tokyonight.nvim",
+        "repo": "folke/tokyonight.nvim",
+        "url": "https://github.com/folke/tokyonight.nvim",
+        "description": "Colorscheme"
+      },
+      {
+        "name": "catppuccin",
+        "repo": "catppuccin/nvim",
+        "url": "https://github.com/catppuccin/nvim",
+        "description": "Alternative colorscheme"
+      },
+      {
+        "name": "lualine.nvim",
+        "repo": "nvim-lualine/lualine.nvim",
+        "url": "https://github.com/nvim-lualine/lualine.nvim",
+        "description": "Statusline"
+      },
+      {
+        "name": "bufferline.nvim",
+        "repo": "akinsho/bufferline.nvim",
+        "url": "https://github.com/akinsho/bufferline.nvim",
+        "description": "Buffer tabs"
+      },
+      {
+        "name": "which-key.nvim",
+        "repo": "folke/which-key.nvim",
+        "url": "https://github.com/folke/which-key.nvim",
+        "description": "Keybinding hints"
+      },
+      {
+        "name": "noice.nvim",
+        "repo": "folke/noice.nvim",
+        "url": "https://github.com/folke/noice.nvim",
+        "description": "UI for messages, cmdline, popupmenu"
+      },
+      {
+        "name": "nvim-notify",
+        "repo": "rcarriga/nvim-notify",
+        "url": "https://github.com/rcarriga/nvim-notify",
+        "description": "Notification manager"
+      },
+      {
+        "name": "dressing.nvim",
+        "repo": "stevearc/dressing.nvim",
+        "url": "https://github.com/stevearc/dressing.nvim",
+        "description": "Better vim.ui interfaces"
+      },
+      {
+        "name": "nui.nvim",
+        "repo": "MunifTanjim/nui.nvim",
+        "url": "https://github.com/MunifTanjim/nui.nvim",
+        "description": "UI component library"
+      },
+      {
+        "name": "nvim-web-devicons",
+        "repo": "nvim-tree/nvim-web-devicons",
+        "url": "https://github.com/nvim-tree/nvim-web-devicons",
+        "description": "File icons"
+      },
+      {
+        "name": "dashboard-nvim",
+        "repo": "nvimdev/dashboard-nvim",
+        "url": "https://github.com/nvimdev/dashboard-nvim",
+        "description": "Start screen"
+      },
+      {
+        "name": "indent-blankline.nvim",
+        "repo": "lukas-reineke/indent-blankline.nvim",
+        "url": "https://github.com/lukas-reineke/indent-blankline.nvim",
+        "description": "Indentation guides"
+      },
+      {
+        "name": "mini.indentscope",
+        "repo": "echasnovski/mini.indentscope",
+        "url": "https://github.com/echasnovski/mini.indentscope",
+        "description": "Active indent guide"
+      }
+    ],
+    "navigation": [
+      {
+        "name": "telescope.nvim",
+        "repo": "nvim-telescope/telescope.nvim",
+        "url": "https://github.com/nvim-telescope/telescope.nvim",
+        "description": "Fuzzy finder"
+      },
+      {
+        "name": "telescope-fzf-native.nvim",
+        "repo": "nvim-telescope/telescope-fzf-native.nvim",
+        "url": "https://github.com/nvim-telescope/telescope-fzf-native.nvim",
+        "description": "Native fzf extension for telescope"
+      },
+      {
+        "name": "oil.nvim",
+        "repo": "stevearc/oil.nvim",
+        "url": "https://github.com/stevearc/oil.nvim",
+        "description": "File explorer as buffer"
+      },
+      {
+        "name": "neo-tree.nvim",
+        "repo": "nvim-neo-tree/neo-tree.nvim",
+        "url": "https://github.com/nvim-neo-tree/neo-tree.nvim",
+        "description": "Tree file manager"
+      },
+      {
+        "name": "harpoon",
+        "repo": "ThePrimeagen/harpoon",
+        "url": "https://github.com/ThePrimeagen/harpoon",
+        "branch": "harpoon2",
+        "description": "Quick file navigation"
+      },
+      {
+        "name": "nvim-spectre",
+        "repo": "nvim-pack/nvim-spectre",
+        "url": "https://github.com/nvim-pack/nvim-spectre",
+        "description": "Find and replace"
+      },
+      {
+        "name": "grug-far.nvim",
+        "repo": "MagicDuck/grug-far.nvim",
+        "url": "https://github.com/MagicDuck/grug-far.nvim",
+        "description": "Better find and replace"
+      },
+      {
+        "name": "persistence.nvim",
+        "repo": "folke/persistence.nvim",
+        "url": "https://github.com/folke/persistence.nvim",
+        "description": "Session management"
+      }
+    ],
+    "editor": [
+      {
+        "name": "Comment.nvim",
+        "repo": "numToStr/Comment.nvim",
+        "url": "https://github.com/numToStr/Comment.nvim",
+        "description": "Smart commenting"
+      },
+      {
+        "name": "nvim-surround",
+        "repo": "kylechui/nvim-surround",
+        "url": "https://github.com/kylechui/nvim-surround",
+        "description": "Surrounding operations"
+      },
+      {
+        "name": "nvim-autopairs",
+        "repo": "windwp/nvim-autopairs",
+        "url": "https://github.com/windwp/nvim-autopairs",
+        "description": "Automatic pair insertion"
+      },
+      {
+        "name": "mini.ai",
+        "repo": "echasnovski/mini.ai",
+        "url": "https://github.com/echasnovski/mini.ai",
+        "description": "Better text objects"
+      },
+      {
+        "name": "mini.bufremove",
+        "repo": "echasnovski/mini.bufremove",
+        "url": "https://github.com/echasnovski/mini.bufremove",
+        "description": "Buffer removal"
+      },
+      {
+        "name": "mini.move",
+        "repo": "echasnovski/mini.move",
+        "url": "https://github.com/echasnovski/mini.move",
+        "description": "Move lines and selections"
+      },
+      {
+        "name": "flash.nvim",
+        "repo": "folke/flash.nvim",
+        "url": "https://github.com/folke/flash.nvim",
+        "description": "Navigation/search"
+      },
+      {
+        "name": "todo-comments.nvim",
+        "repo": "folke/todo-comments.nvim",
+        "url": "https://github.com/folke/todo-comments.nvim",
+        "description": "Highlight and search TODOs"
+      },
+      {
+        "name": "vim-illuminate",
+        "repo": "RRethy/vim-illuminate",
+        "url": "https://github.com/RRethy/vim-illuminate",
+        "description": "Highlight word under cursor"
+      },
+      {
+        "name": "vim-sleuth",
+        "repo": "tpope/vim-sleuth",
+        "url": "https://github.com/tpope/vim-sleuth",
+        "description": "Detect indentation"
+      },
+      {
+        "name": "vim-repeat",
+        "repo": "tpope/vim-repeat",
+        "url": "https://github.com/tpope/vim-repeat",
+        "description": "Better repeat"
+      },
+      {
+        "name": "nvim-ts-autotag",
+        "repo": "windwp/nvim-ts-autotag",
+        "url": "https://github.com/windwp/nvim-ts-autotag",
+        "description": "Auto close and rename tags"
+      }
+    ],
+    "ai": [
+      {
+        "name": "codecompanion.nvim",
+        "repo": "olimorris/codecompanion.nvim",
+        "url": "https://github.com/olimorris/codecompanion.nvim",
+        "description": "Multi-provider AI assistant"
+      },
+      {
+        "name": "avante.nvim",
+        "repo": "yetone/avante.nvim",
+        "url": "https://github.com/yetone/avante.nvim",
+        "description": "AI editor (like Cursor)"
+      },
+      {
+        "name": "gen.nvim",
+        "repo": "David-Kunz/gen.nvim",
+        "url": "https://github.com/David-Kunz/gen.nvim",
+        "description": "Local LLM integration (Ollama)"
+      }
+    ],
+    "git": [
+      {
+        "name": "gitsigns.nvim",
+        "repo": "lewis6991/gitsigns.nvim",
+        "url": "https://github.com/lewis6991/gitsigns.nvim",
+        "description": "Git signs in gutter"
+      },
+      {
+        "name": "vim-fugitive",
+        "repo": "tpope/vim-fugitive",
+        "url": "https://github.com/tpope/vim-fugitive",
+        "description": "Git command wrapper"
+      },
+      {
+        "name": "lazygit.nvim",
+        "repo": "kdheepak/lazygit.nvim",
+        "url": "https://github.com/kdheepak/lazygit.nvim",
+        "description": "LazyGit integration"
+      }
+    ],
+    "debugging": [
+      {
+        "name": "nvim-dap",
+        "repo": "mfussenegger/nvim-dap",
+        "url": "https://github.com/mfussenegger/nvim-dap",
+        "description": "Debug Adapter Protocol"
+      },
+      {
+        "name": "nvim-dap-ui",
+        "repo": "rcarriga/nvim-dap-ui",
+        "url": "https://github.com/rcarriga/nvim-dap-ui",
+        "description": "DAP UI"
+      },
+      {
+        "name": "nvim-dap-virtual-text",
+        "repo": "theHamsta/nvim-dap-virtual-text",
+        "url": "https://github.com/theHamsta/nvim-dap-virtual-text",
+        "description": "Virtual text for debugger"
+      },
+      {
+        "name": "mason-nvim-dap.nvim",
+        "repo": "jay-babu/mason-nvim-dap.nvim",
+        "url": "https://github.com/jay-babu/mason-nvim-dap.nvim",
+        "description": "Mason integration for DAP"
+      }
+    ],
+    "testing": [
+      {
+        "name": "neotest",
+        "repo": "nvim-neotest/neotest",
+        "url": "https://github.com/nvim-neotest/neotest",
+        "description": "Test runner"
+      },
+      {
+        "name": "nvim-nio",
+        "repo": "nvim-neotest/nvim-nio",
+        "url": "https://github.com/nvim-neotest/nvim-nio",
+        "description": "Async IO library for Neovim"
+      }
+    ],
+    "misc": [
+      {
+        "name": "toggleterm.nvim",
+        "repo": "akinsho/toggleterm.nvim",
+        "url": "https://github.com/akinsho/toggleterm.nvim",
+        "description": "Terminal management"
+      },
+      {
+        "name": "nvim-colorizer.lua",
+        "repo": "NvChad/nvim-colorizer.lua",
+        "url": "https://github.com/NvChad/nvim-colorizer.lua",
+        "description": "Color highlighting"
+      },
+      {
+        "name": "nvim-bqf",
+        "repo": "kevinhwang91/nvim-bqf",
+        "url": "https://github.com/kevinhwang91/nvim-bqf",
+        "description": "Better quickfix"
+      },
+      {
+        "name": "undotree",
+        "repo": "mbbill/undotree",
+        "url": "https://github.com/mbbill/undotree",
+        "description": "Undo history visualizer"
+      },
+      {
+        "name": "zen-mode.nvim",
+        "repo": "folke/zen-mode.nvim",
+        "url": "https://github.com/folke/zen-mode.nvim",
+        "description": "Distraction-free coding"
+      },
+      {
+        "name": "twilight.nvim",
+        "repo": "folke/twilight.nvim",
+        "url": "https://github.com/folke/twilight.nvim",
+        "description": "Dim inactive code"
+      }
+    ]
+  }
+}

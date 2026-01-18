@@ -15,7 +15,7 @@ return {
     init = function(plugin)
       -- Perf: add treesitter queries to rtp early for other plugins
       require("lazy.core.loader").add_to_rtp(plugin)
-      require("nvim-treesitter.query_predicates")
+      pcall(require, "nvim-treesitter.query_predicates")
     end,
     cmd = { "TSUpdateSync", "TSUpdate", "TSInstall" },
     keys = {
@@ -81,18 +81,24 @@ return {
       },
     },
     config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
+      local ok, configs = pcall(require, "nvim-treesitter.configs")
+      if ok then
+        configs.setup(opts)
+      end
     end,
   },
 
   -- Treesitter textobjects
   {
     "nvim-treesitter/nvim-treesitter-textobjects",
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
     event = "VeryLazy",
     config = function()
-      -- Wait for treesitter to load
-      local move = require("nvim-treesitter.textobjects.move")
-      local configs = require("nvim-treesitter.configs")
+      -- Wrap in pcall to handle case where treesitter isn't loaded yet
+      local ok, move = pcall(require, "nvim-treesitter.textobjects.move")
+      if not ok then return end
+      local ok2, configs = pcall(require, "nvim-treesitter.configs")
+      if not ok2 then return end
       for name, fn in pairs(move) do
         if name:find("goto") == 1 then
           move[name] = function(q, ...)
@@ -174,10 +180,12 @@ return {
     },
     config = function(_, opts)
       require("nvim-autopairs").setup(opts)
-      -- Integration with cmp if available
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local cmp = require("cmp")
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      -- Integration with nvim-cmp if available (not used with blink.cmp)
+      local ok, cmp = pcall(require, "cmp")
+      if ok then
+        local cmp_autopairs = require("nvim-autopairs.completion.cmp")
+        cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
+      end
     end,
   },
 
