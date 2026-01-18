@@ -40,14 +40,16 @@ fi
 CUSTOM_PLUGINS_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
 if [ -d "$CUSTOM_PLUGINS_DIR" ]; then
     print_info "Updating custom plugins..."
-    cd "$CUSTOM_PLUGINS_DIR"
-    for plugin in */; do
-        if [ -d "$plugin/.git" ]; then
-            plugin_name=$(basename "$plugin")
-            print_info "  Updating $plugin_name..."
-            (cd "$plugin" && git pull --quiet)
-        fi
-    done
+    (
+        cd "$CUSTOM_PLUGINS_DIR" || exit
+        for plugin in */; do
+            if [ -d "$plugin/.git" ]; then
+                plugin_name=$(basename "$plugin")
+                print_info "  Updating $plugin_name..."
+                (cd "$plugin" && git pull --quiet)
+            fi
+        done
+    )
     print_info "Custom plugins updated!"
 else
     print_warn "Custom plugins directory not found"

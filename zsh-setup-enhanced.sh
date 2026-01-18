@@ -267,12 +267,12 @@ extract() {
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # Faster completion cache
-# Regenerate cache only if .zcompdump is older than 24 hours
+# Only regenerate cache if .zcompdump is older than 24 hours or doesn't exist
 autoload -Uz compinit
-if [[ -n \${ZDOTDIR:-\$HOME}/.zcompdump(#qN.mh+24) ]]; then
-    compinit
-else
+if [[ -n \${ZDOTDIR:-\$HOME}/.zcompdump(#qN.mh-24) ]]; then
     compinit -C
+else
+    compinit
 fi
 
 # ============================================
