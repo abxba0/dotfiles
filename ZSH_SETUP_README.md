@@ -60,12 +60,13 @@ brew install bat exa ripgrep fd neovim
 
 ### Ubuntu/Debian
 ```bash
-# Note: 'bat' is installed as 'batcat' on Ubuntu/Debian
+# Note: On Ubuntu/Debian, 'bat' is installed as 'batcat' to avoid conflicts
+# Check which version you have: dpkg -l | grep -E 'bat|batcat'
 sudo apt install batcat exa ripgrep fd-find neovim
 # Create symlinks for easier usage
 mkdir -p ~/.local/bin
-ln -s /usr/bin/batcat ~/.local/bin/bat
-ln -s /usr/bin/fdfind ~/.local/bin/fd
+ln -s /usr/bin/batcat ~/.local/bin/bat 2>/dev/null || ln -s /usr/bin/bat ~/.local/bin/bat
+ln -s /usr/bin/fdfind ~/.local/bin/fd 2>/dev/null || ln -s /usr/bin/fd ~/.local/bin/fd
 # Add ~/.local/bin to PATH if not already present
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 ```
