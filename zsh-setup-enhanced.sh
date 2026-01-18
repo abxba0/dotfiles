@@ -268,10 +268,10 @@ zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 
 # Faster completion cache
 autoload -Uz compinit
-if [[ -n \${ZDOTDIR}/.zcompdump(#qN.mh+24) ]]; then
-    compinit
-else
+if [[ -n \${ZDOTDIR:-\$HOME}/.zcompdump(#qN.mh+24) ]]; then
     compinit -C
+else
+    compinit
 fi
 
 # ============================================
