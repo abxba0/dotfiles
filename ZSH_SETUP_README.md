@@ -66,6 +66,8 @@ sudo apt install bat exa ripgrep fd-find neovim
 mkdir -p ~/.local/bin
 ln -s /usr/bin/batcat ~/.local/bin/bat
 ln -s /usr/bin/fdfind ~/.local/bin/fd
+# Add ~/.local/bin to PATH if not already present
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
 ```
 
 ### Aliases for these tools
