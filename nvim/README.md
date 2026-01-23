@@ -96,18 +96,15 @@ For more details, visit the [nvimdots repository](https://github.com/ayamir/nvim
 
 ## What's Included
 
-This directory contains:
+This directory contains setup scripts for nvimdots:
 
 ```
 nvim/
 ├── install_prerequisites.sh  # System dependencies installer
-├── install_plugins.sh        # Legacy plugin installer (optional)
-├── plugins.json              # Plugin manifest for reference
-├── README.md                 # This file
-└── lua/                      # Legacy config files (optional)
+└── README.md                 # This file
 ```
 
-After installing nvimdots, your Neovim configuration will be at `~/.config/nvim/` with the full nvimdots structure. See the [nvimdots repository](https://github.com/ayamir/nvimdots) for details on the configuration structure.
+After running `install_prerequisites.sh` and the nvimdots installer, your Neovim configuration will be at `~/.config/nvim/` with the full nvimdots structure. See the [nvimdots repository](https://github.com/ayamir/nvimdots) for details on the configuration structure.
 
 ## Keybindings
 
