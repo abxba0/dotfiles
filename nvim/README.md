@@ -1,62 +1,87 @@
-# Neovim Configuration
+# Neovim Configuration (nvimdots)
 
-A modern, modular Neovim configuration using lazy.nvim as the plugin manager. Designed for productivity with intelligent defaults and extensive customization options.
+This directory contains setup scripts for [nvimdots](https://github.com/ayamir/nvimdots), a modern and efficient Neovim configuration with startup times under 50ms. nvimdots is a pure Lua config using lazy.nvim as the plugin manager, designed for productivity with intelligent defaults.
 
 ## Features
 
+- **Blazing Fast**: Startup times under 50ms
+- **Pure Lua Config**: Modern, maintainable configuration
 - **Plugin Manager**: lazy.nvim for fast, lazy-loading plugin management
 - **LSP Support**: Full LSP integration with mason.nvim for easy server installation
-- **Completion**: Modern completion with blink.cmp and LuaSnip snippets
-- **Fuzzy Finding**: Telescope with fzf-native for lightning-fast search
-- **File Navigation**: Oil.nvim (buffer-based) and Neo-tree (tree-based) explorers
-- **AI Integration**: CodeCompanion and Avante for AI-assisted coding
-- **Git Integration**: Gitsigns, Fugitive, and LazyGit support
+- **Modern Completion**: Advanced completion engine with snippets support
+- **Fuzzy Finding**: Telescope for lightning-fast file and content search
+- **File Navigation**: Multiple file explorer options
+- **Git Integration**: Gitsigns and LazyGit support
 - **Debugging**: DAP support with UI for debugging
-- **Beautiful UI**: Tokyo Night theme, Lualine, Bufferline, and Noice
+- **Beautiful UI**: Customizable themes and statusline
+- **AI Integration**: Support for various AI coding assistants
+
+> **Note**: This setup uses the nvimdots configuration. For full feature list and customization options, see the [nvimdots wiki](https://github.com/ayamir/nvimdots/wiki).
 
 ## Requirements
 
-### Required
+### Required (installed by install_prerequisites.sh)
 
-- Neovim >= 0.9.0
-- Git
-- A [Nerd Font](https://www.nerdfonts.com/) (for icons)
+- **Neovim** >= 0.11.0 (0.10+ for older branches)
+- **Git** - Version control
+- **Node.js** 18+ via nvm - For LSP servers and plugins
+- **Python 3** with pip and venv - For Python-based plugins
+- **Rust** - For rust-analyzer and Rust-dependent plugins
+- **C compiler** (gcc/clang) - For Treesitter
+- **Build tools** (cmake, make) - For native plugins
+- **Nerd Font** - For icons (JetBrainsMono installed by script)
 
-### Recommended
+### Recommended Tools (installed by script)
 
-- [ripgrep](https://github.com/BurntSushi/ripgrep) - Fast grep for Telescope
-- [fd](https://github.com/sharkdp/fd) - Fast file finder for Telescope
-- Node.js - Required for some LSP servers
-- Python 3 - Required for some features
-- A C compiler (gcc/clang) - Required for Treesitter
+- **ripgrep** - Fast grep for Telescope
+- **fd** - Fast file finder for Telescope
+- **lazygit** - Terminal UI for git
+- **zoxide** - Smarter cd command
+- **tree-sitter CLI** - For Treesitter operations
+- **yarn** - Package manager for some plugins
+- **lldb** - Debugger support
+
+All of these are automatically installed by running `install_prerequisites.sh`.
 
 ## Installation
 
-### Quick Install
+### Prerequisites Installation
+
+First, install all required system dependencies:
 
 ```bash
-# Clone this repository
+# Clone this repository (if not already done)
 git clone https://github.com/yourusername/dotfiles.git ~/dotfiles
 
-# Run the install script
+# Run the prerequisites installation script
 cd ~/dotfiles/nvim
-chmod +x install_plugins.sh
-./install_plugins.sh
-
-# Start Neovim
-nvim
+chmod +x install_prerequisites.sh
+./install_prerequisites.sh
 ```
 
-### Manual Install
+This script installs:
+- Neovim (latest stable)
+- Node.js 18+ via nvm
+- Rust toolchain
+- Python 3 with pip and venv
+- Build tools (gcc, clang, cmake, etc.)
+- CLI tools (ripgrep, fd, zoxide, lazygit)
+- Nerd Fonts (JetBrainsMono)
+- And more...
+
+### nvimdots Installation
+
+After prerequisites are installed, restart your shell and install nvimdots:
 
 ```bash
-# Backup existing config
-mv ~/.config/nvim ~/.config/nvim.backup
+# Restart shell or source environment
+source ~/.nvm/nvm.sh
+source ~/.cargo/env
 
-# Copy configuration
-cp -r ~/dotfiles/nvim ~/.config/nvim
+# Install nvimdots using official installer
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/ayamir/nvimdots/HEAD/scripts/install.sh)"
 
-# Start Neovim (plugins will install automatically)
+# Start Neovim
 nvim
 ```
 
@@ -67,172 +92,43 @@ nvim
 3. Run `:checkhealth` to verify setup
 4. Run `:Mason` to install LSP servers
 
-## Directory Structure
+For more details, visit the [nvimdots repository](https://github.com/ayamir/nvimdots).
+
+## What's Included
+
+This directory contains:
 
 ```
-~/.config/nvim/
-├── init.lua                 # Main entry point
-├── lua/
-│   ├── config/
-│   │   ├── options.lua     # Editor options
-│   │   ├── keymaps.lua     # Global keybindings
-│   │   └── autocmds.lua    # Autocommands
-│   ├── plugins/
-│   │   ├── init.lua        # Plugin initialization
-│   │   ├── editor.lua      # Editor enhancement plugins
-│   │   ├── lsp.lua         # LSP and completion
-│   │   ├── ui.lua          # UI/theme plugins
-│   │   ├── navigation.lua  # Navigation plugins
-│   │   ├── ai.lua          # AI assistant plugins
-│   │   └── misc.lua        # Miscellaneous plugins
-│   └── utils/
-│       └── helpers.lua     # Utility functions
-├── after/plugin/           # After-load plugin configs
-├── plugin/                 # Plugin bootstrap (optional)
-├── plugins.json            # Plugin manifest
-└── install_plugins.sh      # Installation script
+nvim/
+├── install_prerequisites.sh  # System dependencies installer
+├── install_plugins.sh        # Legacy plugin installer (optional)
+├── plugins.json              # Plugin manifest for reference
+├── README.md                 # This file
+└── lua/                      # Legacy config files (optional)
 ```
+
+After installing nvimdots, your Neovim configuration will be at `~/.config/nvim/` with the full nvimdots structure. See the [nvimdots repository](https://github.com/ayamir/nvimdots) for details on the configuration structure.
 
 ## Keybindings
 
-Leader key is `<Space>`.
+nvimdots uses `<Space>` as the leader key and comes with a comprehensive set of keybindings.
 
-### General
+### Quick Reference
 
-| Key | Description |
-|-----|-------------|
-| `jk` / `jj` | Exit insert mode |
-| `<C-s>` | Save file |
-| `<leader>qq` | Quit all |
-| `<leader>fn` | New file |
-| `<leader>l` | Open Lazy plugin manager |
+- Press `<Space>` to see available keybindings via which-key
+- Common patterns:
+  - `<Space>f` - Find/File operations
+  - `<Space>g` - Git operations
+  - `<Space>l` - LSP operations
+  - `<Space>b` - Buffer operations
+  - `<Space>s` - Search operations
 
-### File Navigation
-
-| Key | Description |
-|-----|-------------|
-| `<leader><space>` | Find files |
-| `<leader>ff` | Find files |
-| `<leader>fr` | Recent files |
-| `<leader>fb` | Buffers |
-| `<leader>fg` | Git files |
-| `<leader>/` | Live grep |
-| `<leader>sg` | Live grep |
-| `-` | Open Oil file explorer |
-| `<leader>e` | Open Oil file explorer |
-| `<leader>E` | Toggle Neo-tree |
-
-### Buffer Navigation
-
-| Key | Description |
-|-----|-------------|
-| `<S-h>` | Previous buffer |
-| `<S-l>` | Next buffer |
-| `<leader>bd` | Delete buffer |
-| `<leader>bb` | Switch to other buffer |
-
-### Window Navigation
-
-| Key | Description |
-|-----|-------------|
-| `<C-h/j/k/l>` | Navigate windows |
-| `<leader>-` | Split horizontal |
-| `<leader>\|` | Split vertical |
-| `<leader>wd` | Close window |
-
-### LSP
-
-| Key | Description |
-|-----|-------------|
-| `gd` | Go to definition |
-| `gr` | References |
-| `gI` | Go to implementation |
-| `gy` | Go to type definition |
-| `K` | Hover documentation |
-| `<leader>ca` | Code action |
-| `<leader>cr` | Rename |
-| `<leader>cf` | Format |
-| `<leader>cd` | Line diagnostics |
-
-### Git
-
-| Key | Description |
-|-----|-------------|
-| `<leader>gg` | Git status (Fugitive) |
-| `<leader>gG` | LazyGit |
-| `<leader>gc` | Git commits |
-| `<leader>gs` | Git status (Telescope) |
-| `<leader>ghs` | Stage hunk |
-| `<leader>ghr` | Reset hunk |
-| `]h` / `[h` | Next/prev hunk |
-
-### AI
-
-| Key | Description |
-|-----|-------------|
-| `<leader>aa` | AI Actions |
-| `<leader>ac` | AI Chat Toggle |
-| `<leader>aC` | AI Chat (New) |
-| `<leader>ap` | AI Prompt |
-| `<leader>ae` | AI Explain (visual) |
-| `<leader>af` | AI Fix (visual) |
-| `<leader>ar` | AI Refactor (visual) |
-
-### Debug
-
-| Key | Description |
-|-----|-------------|
-| `<leader>db` | Toggle breakpoint |
-| `<leader>dc` | Continue |
-| `<leader>di` | Step into |
-| `<leader>do` | Step out |
-| `<leader>dO` | Step over |
-| `<leader>du` | Toggle DAP UI |
-
-### Search
-
-| Key | Description |
-|-----|-------------|
-| `<leader>sh` | Help pages |
-| `<leader>sk` | Keymaps |
-| `<leader>sc` | Commands |
-| `<leader>sr` | Registers |
-| `<leader>ss` | Document symbols |
-| `<leader>sS` | Workspace symbols |
-
-### Diagnostics
-
-| Key | Description |
-|-----|-------------|
-| `<leader>xx` | Diagnostics (Trouble) |
-| `<leader>xX` | Buffer diagnostics |
-| `<leader>xt` | Todo (Trouble) |
-| `]d` / `[d` | Next/prev diagnostic |
-| `]e` / `[e` | Next/prev error |
-
-### Misc
-
-| Key | Description |
-|-----|-------------|
-| `<leader>uz` | Zen mode |
-| `<leader>ut` | Twilight |
-| `<leader>cu` | Undo tree |
-| `<C-/>` | Toggle terminal |
-| `<leader>?` | Show keymaps (which-key) |
+For a complete list of keybindings, refer to:
+- Press `<Space>` in Neovim to see interactive keybinding menu
+- [nvimdots Keybindings Wiki](https://github.com/ayamir/nvimdots/wiki/Keybindings)
+- Run `:Telescope keymaps` to search all keymaps
 
 ## Configuration
-
-### AI Setup
-
-For AI features, set environment variables:
-
-```bash
-# For Anthropic (Claude)
-export ANTHROPIC_API_KEY='your-api-key'
-
-# For OpenAI
-export OPENAI_API_KEY='your-api-key'
-```
 
 ### LSP Servers
 
@@ -242,33 +138,22 @@ Install LSP servers with Mason:
 :Mason
 ```
 
-Or add them to `lua/plugins/lsp.lua` in the `ensure_installed` list.
+Browse and install language servers, formatters, and linters as needed.
+
+### Customization
+
+nvimdots is highly customizable. For customization guides, see:
+- [nvimdots Wiki - Configuration](https://github.com/ayamir/nvimdots/wiki)
+- [nvimdots Wiki - Plugins](https://github.com/ayamir/nvimdots/wiki/Plugins)
+
+Configuration files are located at:
+- `~/.config/nvim/lua/core/` - Core settings
+- `~/.config/nvim/lua/keymap/` - Keybindings
+- `~/.config/nvim/lua/modules/` - Plugin configurations
 
 ### Adding Plugins
 
-Add new plugins to the appropriate file in `lua/plugins/`:
-
-```lua
--- lua/plugins/misc.lua
-return {
-  {
-    "author/plugin-name",
-    event = "VeryLazy",  -- lazy loading
-    opts = {
-      -- plugin options
-    },
-  },
-}
-```
-
-### Customizing Theme
-
-Change the colorscheme in `lua/plugins/ui.lua`:
-
-```lua
--- Use catppuccin instead of tokyonight
-vim.cmd.colorscheme("catppuccin")
-```
+Edit `~/.config/nvim/lua/modules/plugins.lua` to add new plugins. Refer to the [nvimdots plugin documentation](https://github.com/ayamir/nvimdots/wiki/Plugins) for examples.
 
 ## Health Check
 
@@ -302,58 +187,30 @@ Install a [Nerd Font](https://www.nerdfonts.com/) and configure your terminal to
 
 ## Plugin List
 
-### Core
-- lazy.nvim - Plugin manager
-- plenary.nvim - Utility library
-- nvim-treesitter - Syntax highlighting
+nvimdots comes with a carefully curated set of plugins for various use cases:
 
-### LSP & Completion
-- nvim-lspconfig - LSP configuration
-- mason.nvim - LSP server installer
-- blink.cmp - Completion engine
-- LuaSnip - Snippet engine
-- conform.nvim - Formatting
-- nvim-lint - Linting
+- **Core**: lazy.nvim, plenary.nvim, nvim-treesitter
+- **LSP**: nvim-lspconfig, mason.nvim, completion engine, formatters
+- **UI**: Beautiful themes, statusline, bufferline, which-key
+- **Navigation**: Telescope, file explorers, quick navigation
+- **Editor**: Smart commenting, surround operations, auto-pairs
+- **Git**: Gitsigns, LazyGit integration
+- **Debug**: DAP support with UI
 
-### UI
-- tokyonight.nvim - Colorscheme
-- lualine.nvim - Statusline
-- bufferline.nvim - Buffer tabs
-- which-key.nvim - Keybinding hints
-- noice.nvim - UI enhancements
+For a complete and up-to-date plugin list, see:
+- The [nvimdots README](https://github.com/ayamir/nvimdots#-plugins)
+- Run `:Lazy` in Neovim to see installed plugins
 
-### Navigation
-- telescope.nvim - Fuzzy finder
-- oil.nvim - File explorer
-- neo-tree.nvim - Tree explorer
-- harpoon - Quick navigation
+## Additional Resources
 
-### Editor
-- Comment.nvim - Commenting
-- nvim-surround - Surround operations
-- nvim-autopairs - Auto pairs
-- flash.nvim - Navigation
-
-### AI
-- codecompanion.nvim - AI assistant
-- avante.nvim - AI editor
-
-### Git
-- gitsigns.nvim - Git signs
-- vim-fugitive - Git commands
-- lazygit.nvim - LazyGit integration
-
-### Debug
-- nvim-dap - Debug adapter
-- nvim-dap-ui - Debug UI
+- **nvimdots Repository**: https://github.com/ayamir/nvimdots
+- **nvimdots Wiki**: https://github.com/ayamir/nvimdots/wiki
+- **Report Issues**: https://github.com/ayamir/nvimdots/issues
 
 ## Credits
 
-This configuration is inspired by:
-- [LazyVim](https://github.com/LazyVim/LazyVim)
-- [AstroNvim](https://github.com/AstroNvim/AstroNvim)
-- [NvChad](https://github.com/NvChad/NvChad)
+This setup uses [nvimdots](https://github.com/ayamir/nvimdots) by [@ayamir](https://github.com/ayamir). All credit for the Neovim configuration goes to the nvimdots contributors.
 
 ## License
 
-MIT License - feel free to use and modify as you wish.
+MIT License - The prerequisites installation script is provided as-is. nvimdots has its own license (see [nvimdots repository](https://github.com/ayamir/nvimdots)).
