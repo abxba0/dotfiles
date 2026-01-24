@@ -188,33 +188,63 @@ install_neovim() {
     # Get latest Neovim version
     print_info "Fetching latest Neovim version..."
     local nvim_version
-    if nvim_version=$(retry_command "curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '\"tag_name\": \"v\K[^\"]*'" "Fetch Neovim version"); then
-        print_info "Latest version: v${nvim_version}"
-    else
+    nvim_version=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+
+    if [ -z "$nvim_version" ]; then
         print_error "Failed to fetch Neovim version"
         exit 1
     fi
 
-    # Download Neovim AppImage
-    print_info "Downloading Neovim v${nvim_version}..."
-    if retry_command "curl -Lo /tmp/nvim.appimage 'https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage'" "Download Neovim"; then
-        chmod u+x /tmp/nvim.appimage
+    print_info "Latest version: v${nvim_version}"
 
-        # Test if AppImage works
-        if /tmp/nvim.appimage --version &>/dev/null; then
-            sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
-            print_success "Neovim v${nvim_version} installed successfully"
-        else
-            print_warning "AppImage not working, extracting and installing manually..."
-            /tmp/nvim.appimage --appimage-extract &>/dev/null
+    # Download Neovim AppImage (try multiple URLs)
+    print_info "Downloading Neovim v${nvim_version}..."
+    local download_success=false
+    local download_urls=(
+        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage"
+        "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+    )
+
+    for url in "${download_urls[@]}"; do
+        print_info "Trying: $url"
+        if curl -fL --retry 3 --retry-delay 2 -o /tmp/nvim.appimage "$url" 2>/dev/null; then
+            # Check if we got a valid file (more than 1MB)
+            local file_size=$(stat -c%s /tmp/nvim.appimage 2>/dev/null || echo 0)
+            if [ "$file_size" -gt 1000000 ]; then
+                download_success=true
+                print_success "Download successful (${file_size} bytes)"
+                break
+            else
+                print_warning "Downloaded file too small (${file_size} bytes), trying next URL..."
+                rm -f /tmp/nvim.appimage
+            fi
+        fi
+    done
+
+    if [ "$download_success" = false ]; then
+        print_error "Failed to download Neovim from all URLs"
+        exit 1
+    fi
+
+    chmod u+x /tmp/nvim.appimage
+
+    # Test if AppImage works
+    if /tmp/nvim.appimage --version &>/dev/null; then
+        sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
+        print_success "Neovim v${nvim_version} installed successfully (AppImage mode)"
+    else
+        print_warning "AppImage not working, extracting and installing manually..."
+        if /tmp/nvim.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
+            sudo rm -rf /opt/nvim 2>/dev/null || true
             sudo mv squashfs-root /opt/nvim
             sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
-            rm -rf /tmp/nvim.appimage
-            print_success "Neovim installed (extracted mode)"
+            rm -f /tmp/nvim.appimage
+            print_success "Neovim v${nvim_version} installed (extracted mode)"
+        else
+            print_error "Failed to extract AppImage"
+            rm -f /tmp/nvim.appimage
+            exit 1
         fi
-    else
-        print_error "Failed to download Neovim"
-        exit 1
     fi
 }
 
@@ -231,7 +261,7 @@ install_nodejs() {
         print_success "nvm already installed"
     else
         print_info "Installing nvm (Node Version Manager)..."
-        if retry_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash" "Install nvm"; then
+        if curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash; then
             # Source nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -292,7 +322,7 @@ install_rust() {
     fi
 
     print_info "Downloading Rust installer..."
-    if retry_command "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable" "Install Rust"; then
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable; then
         # Source cargo environment
         if [ -f "$HOME/.cargo/env" ]; then
             source "$HOME/.cargo/env"
@@ -360,7 +390,7 @@ install_zoxide() {
 
     # Fallback to installer script
     print_info "Installing zoxide from official installer..."
-    if retry_command "curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash" "Install zoxide"; then
+    if curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash; then
         print_success "zoxide installed"
     else
         print_warning "Failed to install zoxide, skipping..."
@@ -381,15 +411,17 @@ install_lazygit() {
 
     print_info "Fetching latest lazygit version..."
     local lazygit_version
-    if lazygit_version=$(retry_command "curl -s 'https://api.github.com/repos/jesseduffield/lazygit/releases/latest' | grep -Po '\"tag_name\": \"v\K[^\"]*'" "Fetch lazygit version"); then
-        print_info "Latest version: v${lazygit_version}"
-    else
-        print_error "Failed to fetch lazygit version"
+    lazygit_version=$(curl -s 'https://api.github.com/repos/jesseduffield/lazygit/releases/latest' | grep -Po '"tag_name": "v\K[^"]*')
+
+    if [ -z "$lazygit_version" ]; then
+        print_warning "Failed to fetch lazygit version, skipping..."
         return 1
     fi
 
+    print_info "Latest version: v${lazygit_version}"
     print_info "Downloading lazygit v${lazygit_version}..."
-    if retry_command "curl -Lo /tmp/lazygit.tar.gz 'https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${lazygit_version}_Linux_x86_64.tar.gz'" "Download lazygit"; then
+
+    if curl -fL --retry 3 --retry-delay 2 -o /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${lazygit_version}_Linux_x86_64.tar.gz"; then
         tar -C /tmp -xf /tmp/lazygit.tar.gz lazygit
         sudo install /tmp/lazygit /usr/local/bin
         rm -f /tmp/lazygit /tmp/lazygit.tar.gz
@@ -464,7 +496,7 @@ install_nerd_fonts() {
     print_info "Installing JetBrainsMono Nerd Font..."
     mkdir -p "$fonts_dir"
 
-    if retry_command "curl -Lo /tmp/JetBrainsMono.zip 'https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip'" "Download JetBrainsMono"; then
+    if curl -fL --retry 3 --retry-delay 2 -o /tmp/JetBrainsMono.zip 'https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip'; then
         unzip -qo /tmp/JetBrainsMono.zip -d "$fonts_dir/JetBrainsMono"
         rm -f /tmp/JetBrainsMono.zip
         fc-cache -fv &>/dev/null
