@@ -177,43 +177,114 @@ install_neovim() {
         sudo apt remove -y neovim 2>/dev/null || true
     fi
 
-    # Install FUSE for AppImage support
-    print_info "Installing FUSE for AppImage support..."
-    if sudo apt install -y libfuse2; then
-        print_success "FUSE installed"
-    else
-        print_warning "FUSE installation failed, AppImage might not work"
-    fi
-
     # Get latest Neovim version
     print_info "Fetching latest Neovim version..."
     local nvim_version
-    if nvim_version=$(retry_command "curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '\"tag_name\": \"v\K[^\"]*'" "Fetch Neovim version"); then
-        print_info "Latest version: v${nvim_version}"
+    nvim_version=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
+
+    if [ -z "$nvim_version" ]; then
+        print_warning "Failed to fetch latest version, using fallback version 0.11.5"
+        nvim_version="0.11.5"
     else
-        print_error "Failed to fetch Neovim version"
-        exit 1
+        print_info "Latest version: v${nvim_version}"
     fi
 
-    # Download Neovim AppImage
-    print_info "Downloading Neovim v${nvim_version}..."
-    if retry_command "curl -Lo /tmp/nvim.appimage 'https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage'" "Download Neovim"; then
-        chmod u+x /tmp/nvim.appimage
+    # Try tarball first (more reliable in containers/proxies)
+    print_info "Downloading Neovim tarball v${nvim_version}..."
+    local tarball_success=false
 
-        # Test if AppImage works
-        if /tmp/nvim.appimage --version &>/dev/null; then
-            sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
-            print_success "Neovim v${nvim_version} installed successfully"
+    if curl -fL --max-time 300 -o /tmp/nvim-linux-x86_64.tar.gz \
+        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux-x86_64.tar.gz"; then
+
+        local file_size=$(stat -c%s /tmp/nvim-linux-x86_64.tar.gz 2>/dev/null || echo 0)
+        if [ "$file_size" -gt 1000000 ]; then
+            print_success "Tarball downloaded successfully (${file_size} bytes)"
+
+            # Extract tarball
+            print_info "Extracting Neovim..."
+            sudo rm -rf /opt/nvim 2>/dev/null || true
+            sudo mkdir -p /opt/nvim
+
+            if sudo tar -C /opt/nvim -xzf /tmp/nvim-linux-x86_64.tar.gz --strip-components=1; then
+                sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+                rm -f /tmp/nvim-linux-x86_64.tar.gz
+                tarball_success=true
+                print_success "Neovim v${nvim_version} installed successfully (tarball)"
+            else
+                print_warning "Failed to extract tarball"
+                rm -f /tmp/nvim-linux-x86_64.tar.gz
+            fi
         else
-            print_warning "AppImage not working, extracting and installing manually..."
-            /tmp/nvim.appimage --appimage-extract &>/dev/null
-            sudo mv squashfs-root /opt/nvim
-            sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
-            rm -rf /tmp/nvim.appimage
-            print_success "Neovim installed (extracted mode)"
+            print_warning "Downloaded tarball too small (${file_size} bytes)"
+            rm -f /tmp/nvim-linux-x86_64.tar.gz
         fi
+    fi
+
+    # Fallback to AppImage if tarball failed
+    if [ "$tarball_success" = false ]; then
+        print_warning "Tarball installation failed, trying AppImage..."
+
+        # Install FUSE for AppImage support
+        print_info "Installing FUSE for AppImage support..."
+        sudo apt install -y libfuse2 2>/dev/null || print_warning "FUSE install failed"
+
+        print_info "Downloading Neovim AppImage v${nvim_version}..."
+        local appimage_urls=(
+            "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux-x86_64.appimage"
+            "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
+        )
+
+        local appimage_success=false
+        for url in "${appimage_urls[@]}"; do
+            print_info "Trying: $url"
+            if curl -fL --max-time 300 -o /tmp/nvim-linux-x86_64.appimage "$url"; then
+                local file_size=$(stat -c%s /tmp/nvim-linux-x86_64.appimage 2>/dev/null || echo 0)
+                if [ "$file_size" -gt 1000000 ]; then
+                    print_success "AppImage downloaded (${file_size} bytes)"
+                    chmod u+x /tmp/nvim-linux-x86_64.appimage
+
+                    # Test if AppImage works
+                    if /tmp/nvim-linux-x86_64.appimage --version &>/dev/null; then
+                        sudo mv /tmp/nvim-linux-x86_64.appimage /usr/local/bin/nvim
+                        appimage_success=true
+                        print_success "Neovim v${nvim_version} installed (AppImage mode)"
+                        break
+                    else
+                        print_info "AppImage not executable, extracting..."
+                        if /tmp/nvim-linux-x86_64.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
+                            sudo rm -rf /opt/nvim 2>/dev/null || true
+                            sudo mv squashfs-root /opt/nvim
+                            sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
+                            rm -f /tmp/nvim-linux-x86_64.appimage
+                            appimage_success=true
+                            print_success "Neovim v${nvim_version} installed (extracted AppImage)"
+                            break
+                        fi
+                    fi
+                fi
+                rm -f /tmp/nvim-linux-x86_64.appimage
+            fi
+        done
+
+        if [ "$appimage_success" = false ]; then
+            # Final fallback to PPA
+            print_warning "AppImage failed, trying Ubuntu PPA..."
+            if sudo add-apt-repository -y ppa:neovim-ppa/stable && \
+               sudo apt update && \
+               sudo apt install -y neovim; then
+                print_success "Neovim installed from PPA"
+            else
+                print_error "All Neovim installation methods failed"
+                exit 1
+            fi
+        fi
+    fi
+
+    # Verify installation
+    if command_exists nvim; then
+        print_success "Neovim verified: $(nvim --version | head -n1)"
     else
-        print_error "Failed to download Neovim"
+        print_error "Neovim installation verification failed"
         exit 1
     fi
 }
@@ -231,7 +302,7 @@ install_nodejs() {
         print_success "nvm already installed"
     else
         print_info "Installing nvm (Node Version Manager)..."
-        if retry_command "curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash" "Install nvm"; then
+        if curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash; then
             # Source nvm
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
@@ -292,7 +363,7 @@ install_rust() {
     fi
 
     print_info "Downloading Rust installer..."
-    if retry_command "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable" "Install Rust"; then
+    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable; then
         # Source cargo environment
         if [ -f "$HOME/.cargo/env" ]; then
             source "$HOME/.cargo/env"
@@ -360,7 +431,7 @@ install_zoxide() {
 
     # Fallback to installer script
     print_info "Installing zoxide from official installer..."
-    if retry_command "curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash" "Install zoxide"; then
+    if curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash; then
         print_success "zoxide installed"
     else
         print_warning "Failed to install zoxide, skipping..."
@@ -381,15 +452,17 @@ install_lazygit() {
 
     print_info "Fetching latest lazygit version..."
     local lazygit_version
-    if lazygit_version=$(retry_command "curl -s 'https://api.github.com/repos/jesseduffield/lazygit/releases/latest' | grep -Po '\"tag_name\": \"v\K[^\"]*'" "Fetch lazygit version"); then
-        print_info "Latest version: v${lazygit_version}"
-    else
-        print_error "Failed to fetch lazygit version"
+    lazygit_version=$(curl -s 'https://api.github.com/repos/jesseduffield/lazygit/releases/latest' | grep -Po '"tag_name": "v\K[^"]*')
+
+    if [ -z "$lazygit_version" ]; then
+        print_warning "Failed to fetch lazygit version, skipping..."
         return 1
     fi
 
+    print_info "Latest version: v${lazygit_version}"
     print_info "Downloading lazygit v${lazygit_version}..."
-    if retry_command "curl -Lo /tmp/lazygit.tar.gz 'https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${lazygit_version}_Linux_x86_64.tar.gz'" "Download lazygit"; then
+
+    if curl -fL --retry 3 --retry-delay 2 -o /tmp/lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${lazygit_version}_Linux_x86_64.tar.gz"; then
         tar -C /tmp -xf /tmp/lazygit.tar.gz lazygit
         sudo install /tmp/lazygit /usr/local/bin
         rm -f /tmp/lazygit /tmp/lazygit.tar.gz
@@ -464,7 +537,7 @@ install_nerd_fonts() {
     print_info "Installing JetBrainsMono Nerd Font..."
     mkdir -p "$fonts_dir"
 
-    if retry_command "curl -Lo /tmp/JetBrainsMono.zip 'https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip'" "Download JetBrainsMono"; then
+    if curl -fL --retry 3 --retry-delay 2 -o /tmp/JetBrainsMono.zip 'https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip'; then
         unzip -qo /tmp/JetBrainsMono.zip -d "$fonts_dir/JetBrainsMono"
         rm -f /tmp/JetBrainsMono.zip
         fc-cache -fv &>/dev/null
