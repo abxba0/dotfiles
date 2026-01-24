@@ -177,74 +177,115 @@ install_neovim() {
         sudo apt remove -y neovim 2>/dev/null || true
     fi
 
-    # Install FUSE for AppImage support
-    print_info "Installing FUSE for AppImage support..."
-    if sudo apt install -y libfuse2; then
-        print_success "FUSE installed"
-    else
-        print_warning "FUSE installation failed, AppImage might not work"
-    fi
-
     # Get latest Neovim version
     print_info "Fetching latest Neovim version..."
     local nvim_version
     nvim_version=$(curl -s https://api.github.com/repos/neovim/neovim/releases/latest | grep -Po '"tag_name": "v\K[^"]*')
 
     if [ -z "$nvim_version" ]; then
-        print_error "Failed to fetch Neovim version"
-        exit 1
+        print_warning "Failed to fetch latest version, using fallback version 0.11.5"
+        nvim_version="0.11.5"
+    else
+        print_info "Latest version: v${nvim_version}"
     fi
 
-    print_info "Latest version: v${nvim_version}"
+    # Try tarball first (more reliable in containers/proxies)
+    print_info "Downloading Neovim tarball v${nvim_version}..."
+    local tarball_success=false
 
-    # Download Neovim AppImage (try multiple URLs)
-    print_info "Downloading Neovim v${nvim_version}..."
-    local download_success=false
-    local download_urls=(
-        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage"
-        "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
-    )
+    if curl -fL --max-time 300 -o /tmp/nvim-linux64.tar.gz \
+        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux64.tar.gz"; then
 
-    for url in "${download_urls[@]}"; do
-        print_info "Trying: $url"
-        if curl -fL --retry 3 --retry-delay 2 -o /tmp/nvim.appimage "$url" 2>/dev/null; then
-            # Check if we got a valid file (more than 1MB)
-            local file_size=$(stat -c%s /tmp/nvim.appimage 2>/dev/null || echo 0)
-            if [ "$file_size" -gt 1000000 ]; then
-                download_success=true
-                print_success "Download successful (${file_size} bytes)"
-                break
+        local file_size=$(stat -c%s /tmp/nvim-linux64.tar.gz 2>/dev/null || echo 0)
+        if [ "$file_size" -gt 1000000 ]; then
+            print_success "Tarball downloaded successfully (${file_size} bytes)"
+
+            # Extract tarball
+            print_info "Extracting Neovim..."
+            sudo rm -rf /opt/nvim 2>/dev/null || true
+            sudo mkdir -p /opt/nvim
+
+            if sudo tar -C /opt/nvim -xzf /tmp/nvim-linux64.tar.gz --strip-components=1; then
+                sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+                rm -f /tmp/nvim-linux64.tar.gz
+                tarball_success=true
+                print_success "Neovim v${nvim_version} installed successfully (tarball)"
             else
-                print_warning "Downloaded file too small (${file_size} bytes), trying next URL..."
+                print_warning "Failed to extract tarball"
+                rm -f /tmp/nvim-linux64.tar.gz
+            fi
+        else
+            print_warning "Downloaded tarball too small (${file_size} bytes)"
+            rm -f /tmp/nvim-linux64.tar.gz
+        fi
+    fi
+
+    # Fallback to AppImage if tarball failed
+    if [ "$tarball_success" = false ]; then
+        print_warning "Tarball installation failed, trying AppImage..."
+
+        # Install FUSE for AppImage support
+        print_info "Installing FUSE for AppImage support..."
+        sudo apt install -y libfuse2 2>/dev/null || print_warning "FUSE install failed"
+
+        print_info "Downloading Neovim AppImage v${nvim_version}..."
+        local appimage_urls=(
+            "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage"
+            "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+        )
+
+        local appimage_success=false
+        for url in "${appimage_urls[@]}"; do
+            print_info "Trying: $url"
+            if curl -fL --max-time 300 -o /tmp/nvim.appimage "$url"; then
+                local file_size=$(stat -c%s /tmp/nvim.appimage 2>/dev/null || echo 0)
+                if [ "$file_size" -gt 1000000 ]; then
+                    print_success "AppImage downloaded (${file_size} bytes)"
+                    chmod u+x /tmp/nvim.appimage
+
+                    # Test if AppImage works
+                    if /tmp/nvim.appimage --version &>/dev/null; then
+                        sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
+                        appimage_success=true
+                        print_success "Neovim v${nvim_version} installed (AppImage mode)"
+                        break
+                    else
+                        print_info "AppImage not executable, extracting..."
+                        if /tmp/nvim.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
+                            sudo rm -rf /opt/nvim 2>/dev/null || true
+                            sudo mv squashfs-root /opt/nvim
+                            sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
+                            rm -f /tmp/nvim.appimage
+                            appimage_success=true
+                            print_success "Neovim v${nvim_version} installed (extracted AppImage)"
+                            break
+                        fi
+                    fi
+                fi
                 rm -f /tmp/nvim.appimage
             fi
-        fi
-    done
+        done
 
-    if [ "$download_success" = false ]; then
-        print_error "Failed to download Neovim from all URLs"
-        exit 1
+        if [ "$appimage_success" = false ]; then
+            # Final fallback to PPA
+            print_warning "AppImage failed, trying Ubuntu PPA..."
+            if sudo add-apt-repository -y ppa:neovim-ppa/stable && \
+               sudo apt update && \
+               sudo apt install -y neovim; then
+                print_success "Neovim installed from PPA"
+            else
+                print_error "All Neovim installation methods failed"
+                exit 1
+            fi
+        fi
     fi
 
-    chmod u+x /tmp/nvim.appimage
-
-    # Test if AppImage works
-    if /tmp/nvim.appimage --version &>/dev/null; then
-        sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
-        print_success "Neovim v${nvim_version} installed successfully (AppImage mode)"
+    # Verify installation
+    if command_exists nvim; then
+        print_success "Neovim verified: $(nvim --version | head -n1)"
     else
-        print_warning "AppImage not working, extracting and installing manually..."
-        if /tmp/nvim.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
-            sudo rm -rf /opt/nvim 2>/dev/null || true
-            sudo mv squashfs-root /opt/nvim
-            sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
-            rm -f /tmp/nvim.appimage
-            print_success "Neovim v${nvim_version} installed (extracted mode)"
-        else
-            print_error "Failed to extract AppImage"
-            rm -f /tmp/nvim.appimage
-            exit 1
-        fi
+        print_error "Neovim installation verification failed"
+        exit 1
     fi
 }
 
