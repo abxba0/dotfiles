@@ -193,10 +193,10 @@ install_neovim() {
     print_info "Downloading Neovim tarball v${nvim_version}..."
     local tarball_success=false
 
-    if curl -fL --max-time 300 -o /tmp/nvim-linux64.tar.gz \
-        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux64.tar.gz"; then
+    if curl -fL --max-time 300 -o /tmp/nvim-linux-x86_64.tar.gz \
+        "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux-x86_64.tar.gz"; then
 
-        local file_size=$(stat -c%s /tmp/nvim-linux64.tar.gz 2>/dev/null || echo 0)
+        local file_size=$(stat -c%s /tmp/nvim-linux-x86_64.tar.gz 2>/dev/null || echo 0)
         if [ "$file_size" -gt 1000000 ]; then
             print_success "Tarball downloaded successfully (${file_size} bytes)"
 
@@ -205,18 +205,18 @@ install_neovim() {
             sudo rm -rf /opt/nvim 2>/dev/null || true
             sudo mkdir -p /opt/nvim
 
-            if sudo tar -C /opt/nvim -xzf /tmp/nvim-linux64.tar.gz --strip-components=1; then
+            if sudo tar -C /opt/nvim -xzf /tmp/nvim-linux-x86_64.tar.gz --strip-components=1; then
                 sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
-                rm -f /tmp/nvim-linux64.tar.gz
+                rm -f /tmp/nvim-linux-x86_64.tar.gz
                 tarball_success=true
                 print_success "Neovim v${nvim_version} installed successfully (tarball)"
             else
                 print_warning "Failed to extract tarball"
-                rm -f /tmp/nvim-linux64.tar.gz
+                rm -f /tmp/nvim-linux-x86_64.tar.gz
             fi
         else
             print_warning "Downloaded tarball too small (${file_size} bytes)"
-            rm -f /tmp/nvim-linux64.tar.gz
+            rm -f /tmp/nvim-linux-x86_64.tar.gz
         fi
     fi
 
@@ -230,39 +230,39 @@ install_neovim() {
 
         print_info "Downloading Neovim AppImage v${nvim_version}..."
         local appimage_urls=(
-            "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim.appimage"
-            "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+            "https://github.com/neovim/neovim/releases/download/v${nvim_version}/nvim-linux-x86_64.appimage"
+            "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage"
         )
 
         local appimage_success=false
         for url in "${appimage_urls[@]}"; do
             print_info "Trying: $url"
-            if curl -fL --max-time 300 -o /tmp/nvim.appimage "$url"; then
-                local file_size=$(stat -c%s /tmp/nvim.appimage 2>/dev/null || echo 0)
+            if curl -fL --max-time 300 -o /tmp/nvim-linux-x86_64.appimage "$url"; then
+                local file_size=$(stat -c%s /tmp/nvim-linux-x86_64.appimage 2>/dev/null || echo 0)
                 if [ "$file_size" -gt 1000000 ]; then
                     print_success "AppImage downloaded (${file_size} bytes)"
-                    chmod u+x /tmp/nvim.appimage
+                    chmod u+x /tmp/nvim-linux-x86_64.appimage
 
                     # Test if AppImage works
-                    if /tmp/nvim.appimage --version &>/dev/null; then
-                        sudo mv /tmp/nvim.appimage /usr/local/bin/nvim
+                    if /tmp/nvim-linux-x86_64.appimage --version &>/dev/null; then
+                        sudo mv /tmp/nvim-linux-x86_64.appimage /usr/local/bin/nvim
                         appimage_success=true
                         print_success "Neovim v${nvim_version} installed (AppImage mode)"
                         break
                     else
                         print_info "AppImage not executable, extracting..."
-                        if /tmp/nvim.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
+                        if /tmp/nvim-linux-x86_64.appimage --appimage-extract &>/dev/null && [ -d squashfs-root ]; then
                             sudo rm -rf /opt/nvim 2>/dev/null || true
                             sudo mv squashfs-root /opt/nvim
                             sudo ln -sf /opt/nvim/usr/bin/nvim /usr/local/bin/nvim
-                            rm -f /tmp/nvim.appimage
+                            rm -f /tmp/nvim-linux-x86_64.appimage
                             appimage_success=true
                             print_success "Neovim v${nvim_version} installed (extracted AppImage)"
                             break
                         fi
                     fi
                 fi
-                rm -f /tmp/nvim.appimage
+                rm -f /tmp/nvim-linux-x86_64.appimage
             fi
         done
 
